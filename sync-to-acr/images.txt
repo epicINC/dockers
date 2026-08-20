@@ -3,7 +3,6 @@ rabbitmq:latest
 node:lts
 node:lts-slim
 node:alpine
-nginx-ui:latest
 nginx:latest
 nginx:lpine
 traefik:latest
@@ -11,3 +10,4 @@ caddy:latest
 busybox:latest
 bitnami/postgresql:latest
 gotenberg/gotenberg:8
+vulhub/nginx-ui:latest
