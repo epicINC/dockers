@@ -53,4 +53,4 @@ jobs:
 
             echo "Copying $src -> $dest"
             skopeo copy --multi-arch all "docker://$src" "docker://$dest"
-          done < images.txt
+          done < ./sync-images.txt
