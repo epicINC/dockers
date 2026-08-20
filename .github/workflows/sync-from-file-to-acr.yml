@@ -4,7 +4,7 @@ on:
   workflow_dispatch:      # 手动触发
   push:
     paths:
-      - '/sync-images.txt'        # 仅当 images.txt 文件变更时自动触发
+      - '/sync-to-acr/images.txt'        # 仅当 images.txt 文件变更时自动触发
       - '.github/workflows/sync-from-file-to-acr.yml'
 env:
   ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
@@ -53,4 +53,4 @@ jobs:
 
             echo "Copying $src -> $dest"
             skopeo copy --multi-arch all "docker://$src" "docker://$dest"
-          done < ./sync-images.txt
+          done < ./sync-to-acr/images.txt
