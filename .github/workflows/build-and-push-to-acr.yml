@@ -36,6 +36,8 @@ jobs:
         with:
           install: true
           driver: docker-container          # 关键：启用多平台支持
+          driver-opts: |
+            image=moby/buildkit:latest
           buildkitd-flags: --debug
 
       - name: Log in to Aliyun ACR
