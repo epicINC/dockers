@@ -59,7 +59,7 @@ jobs:
           # 自动生成多种 tag，如 latest、分支名、commit SHA 等
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ env.DOCKERFILE_CONTEXT }}
           file: ${{ env.DOCKERFILE_CONTEXT }}/Dockerfile
