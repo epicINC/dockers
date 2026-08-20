@@ -1,0 +1,13 @@
+postgres:18
+bitnami/postgresql:latest
+rabbitmq:latest
+gotenberg:8
+node:lts
+node:lts-slim
+node:alpine
+nginx-ui:latest
+nginx:latest
+nginx:lpine
+traefik:latest
+caddy:latest
+busybox:latest

@@ -1,0 +1,72 @@
+name: Build and Push Multi-Arch Image to Aliyun ACR
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    # 可选：仅当 Dockerfile 或本 workflow 文件变更时才触发
+    paths:
+      - '/bitnami-postgresql/Dockerfile'
+      - '.github/workflows/build-and-push-to-acr.yml'
+  workflow_dispatch:
+
+env:
+  # 阿里云 ACR 配置（通过 GitHub Secrets 注入）
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}        # 例如: registry.cn-hangzhou.aliyuncs.com
+  ACR_NAMESPACE: ${{ secrets.ACR_NAMESPACE }}      # 命名空间
+  IMAGE_NAME: bitnami-postgresql                   # 镜像名称
+  DOCKERFILE_CONTEXT: ./bitnami-postgresql
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # 给 GitHub Actions 写权限，用于推送
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        # QEMU 用于在 x86 runner 上模拟 arm64 等架构[reference:0]
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        # Buildx 是 Docker 官方多平台构建插件[reference:2]
+
+      - name: Log in to Aliyun ACR
+        uses: aliyun/acr-login@v1
+        with:
+          login-server: ${{ env.ACR_REGISTRY }}
+          username: ${{ secrets.ALIYUN_ACR_USERNAME }}
+          password: ${{ secrets.ALIYUN_ACR_PASSWORD }}
+        # 也可以使用 AccessKey 方式登录
+
+      - name: Generate Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+          # 自动生成多种 tag，如 latest、分支名、commit SHA 等
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.DOCKERFILE_CONTEXT }}
+          file: ${{ env.DOCKERFILE_CONTEXT }}/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          # 指定多架构[reference:8]
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          # 如果遇到 buildx 版本兼容问题可添加此选项

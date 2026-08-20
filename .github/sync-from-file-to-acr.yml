@@ -1,0 +1,56 @@
+name: Copy Multi-Arch Images from images.txt to ACR
+
+on:
+  workflow_dispatch:      # 手动触发
+  push:
+    paths:
+      - '/sync-images.txt'        # 仅当 images.txt 文件变更时自动触发
+      - '.github/workflows/sync-from-file-to-acr.yml'
+env:
+  ACR_REGISTRY: ${{ secrets.ACR_REGISTRY }}
+  ACR_NAMESPACE: ${{ secrets.ACR_PUB_NAMESPACE }}
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      - name: Login to Aliyun ACR
+        run: |
+          skopeo login \
+            -u ${{ secrets.ACR_USERNAME }} \
+            -p ${{ secrets.ACR_PASSWORD }} \
+            ${{ env.ACR_REGISTRY }}
+
+      - name: Copy images from images.txt
+        run: |
+          # 读取 images.txt，逐行处理（忽略空行和注释行）
+          while IFS= read -r src || [ -n "$src" ]; do
+            # 去除首尾空格
+            src=$(echo "$src" | xargs)
+            # 跳过空行和以 # 开头的注释行
+            [[ -z "$src" || "$src" =~ ^# ]] && continue
+
+            # 提取镜像名和 tag（无 tag 则默认 latest）
+            if [[ "$src" == *":"* ]]; then
+              image_name=$(echo "$src" | cut -d':' -f1)
+              tag=$(echo "$src" | cut -d':' -f2)
+            else
+              image_name="$src"
+              tag="latest"
+            fi
+
+            # 目标镜像名：将源镜像名中的所有 '/' 替换为 '-'
+            dest_image_name=$(echo "$image_name" | tr '/' '-')
+            dest="${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/$dest_image_name:$tag"
+
+            echo "Copying $src -> $dest"
+            skopeo copy --multi-arch all "docker://$src" "docker://$dest"
+          done < images.txt
