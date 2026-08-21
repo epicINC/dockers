@@ -1,4 +1,5 @@
 postgres:18
+postgres:17
 rabbitmq:latest
 node:lts
 node:lts-slim
