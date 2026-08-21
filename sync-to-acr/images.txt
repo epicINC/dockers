@@ -1,6 +1,7 @@
 postgres:18
 postgres:17
 rabbitmq:latest
+rabbitmq:4-management
 node:lts
 node:lts-slim
 node:alpine
