@@ -12,4 +12,4 @@ caddy:latest
 busybox:latest
 bitnami/postgresql:latest
 gotenberg/gotenberg:8
-uozi/nginx-ui:latest
+#uozi/nginx-ui:latest
