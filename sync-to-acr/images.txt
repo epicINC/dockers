@@ -7,6 +7,7 @@ node:lts-slim
 node:alpine
 nginx:latest
 nginx:alpine
+nginx:stable-alpine
 traefik:latest
 caddy:latest
 busybox:latest
