@@ -1,5 +1,5 @@
 postgres:18
-postgres:17
+#postgres:17
 rabbitmq:latest
 rabbitmq:4-management
 node:lts
@@ -8,9 +8,9 @@ node:alpine
 nginx:latest
 nginx:alpine
 nginx:stable-alpine
-traefik:latest
-caddy:latest
-busybox:latest
+#traefik:latest
+#caddy:latest
+#busybox:latest
 bitnami/postgresql:latest
-gotenberg/gotenberg:8
+#gotenberg/gotenberg:8
 #uozi/nginx-ui:latest
